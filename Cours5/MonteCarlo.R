@@ -1,4 +1,4 @@
-# exemple: estimation Monte Carlo d'une intégrale sur (0, 1)
+# exemple: estimation Monte Carlo d'une intégrale sur (0, 1), page 5
 th <- sqrt(pi)/2
 n <- 100
 ech <- runif(n) # création des xi selon la loi uniforme
@@ -33,7 +33,7 @@ mean(couv)
 
 
 
-# exemple: estimation Mont Carlo d'une somme
+# exemple: estimation Mont Carlo d'une somme page 6
 # estimation numérique de theta
 test <- sapply(1:100, function(n) sum( abs(cos(0:n))/factorial(0:n) ))
 plot(test) # on voit que la somme partielle est bien stabilisée après avoir sommé les dix premiers termes
@@ -81,7 +81,7 @@ normalemulti <- function(n, mu, Sig){
   if(length(mu) != nrow(Sig)) stop("Les dimensions de mu et Sig ne sont pas compatibles")
   
   d <- length(mu)
-  L <- t(chol(Sig))
+  L <- t(chol(Sig))#chol est la decomposition de cholesky
   
   z <- matrix(rnorm(n*d), nrow=n)
   return(t(apply(z, 1, function(x) mu + L %*% x)))
