@@ -39,7 +39,7 @@ ma_chol <- function(mat_cov){
   x <- dimension[1]
   for(k in x){
     for(j in x){
-      chol1[k,k] <- sqrt(mat_cov[k,k]-sum())
+      chol1[k,k] <- sqrt(mat_cov[k,k]-sum(mat_cov^2))
     }
   }
 }
