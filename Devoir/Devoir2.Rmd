@@ -1,0 +1,70 @@
+---
+title: "Devoir2"
+author: "René Picard"
+date: "2024-02-13"
+output: pdf_document
+---
+
+le seed
+```{r}
+set.seed(20240220)
+```
+
+
+
+# Question 1
+
+On génère la matrice de covariance $\Sigma$
+```{r}
+V = matrix(nrow = 100, ncol = 100, byrow = T)#car 100 fois 100
+V
+
+for(i in 1:100){
+  for(j in 1:100){
+    V[i,j] <- 5 * 0.8^(abs(i-j))
+  }
+}
+V
+```
+
+
+## (a)
+
+On écrit une fonction ma_chol
+
+
+```{r}
+ma_chol <- function(cov_mat) {
+  n <- nrow(cov_mat)#pour connaitre la dimension de la matrice
+  L <- matrix(0, n, n)#on initialise la matrice
+  
+  #ici on calcul les colonne en dernier et les lignes en premier
+  for (k in 1:n) {
+    for (j in 1:n) {
+      #ici on calcul l'élément L_kk du théorème
+      if(j == k){
+        L[k,k] <- sqrt(cov_mat[k,k]- sum(L[k, 1:(k-1)]^2))
+      }
+      
+      #calcul de l'élément L_jk du théorème
+      if (j > k) {
+        L[j,k] <- (1/L[k,k])*(cov_mat[j,k] - sum(L[j, 1:(k-1)]*L[k, 1:(k-1)]))
+      }
+    }
+  }
+  return(L)
+}
+```
+
+
+## (b)
+
+On utilise notre fonction ma_chol avec la matrice $V$ créé plus juste après la question 1 (donc on n'implémentera pas l'indice qui aurait été utile si j'avais lu les questions avant de commencer l'exercices...)
+```{r}
+ma_chol(V)
+```
+
+
+## (c)
+
+

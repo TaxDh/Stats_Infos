@@ -1,0 +1,59 @@
+L11 = sqrt(cov[1,1])
+L21 = cov[2,1]/L11
+L22 = sqrt(cov22 - L21^2)
+L31 = cov31/L11
+L32 = (cov32 - L31L21)/L22
+L33 = sqrt(cov33 - L31^2 - L32^2)
+
+Théorème:
+Ljk
+
+
+for(k in 1:n)
+	for(j in 1:n)
+	
+		if(j==k)
+		Lkk = sqrt(covkk - sum(L[k, 1:(k-1)]^2))
+
+		if(j>k)
+		Ljk = (1/Lkk)(cov[jk] - sum(L[j, 1:(k-1)]*L[k, 1:(k-1)]))
+		
+
+
+#numéro c):
+
+# Prérequis : La matrice L de la décomposition de Cholesky a été calculée précédemment et est stockée dans L
+
+set.seed(123) # Fixer une graine pour la reproductibilité
+n <- 5000
+p <- nrow(L) # Le nombre de variables, ici 100
+
+# Étape 1 : Générer des échantillons de la loi normale standard
+Z <- matrix(rnorm(n * p), nrow = p, ncol = n)
+
+# Étape 2 : Multiplier par la matrice de Cholesky pour obtenir des échantillons de N(0, Sigma)
+X <- L %*% Z
+
+# Chaque colonne de X est maintenant un vecteur aléatoire de N(0, Sigma)
+
+#numéro d)
+
+# Calculer theta pour chaque échantillon
+theta_estimates <- apply(X, 2, function(x) exp(max(x)))
+
+# Estimation de theta
+theta_hat <- mean(theta_estimates)
+
+# Calculer l'écart type de theta
+theta_sd <- sd(theta_estimates)
+
+# Nombre d'observations
+n <- length(theta_estimates)
+
+# Calculer l'intervalle de confiance à 95%
+ci_lower <- theta_hat - (1.96 * theta_sd / sqrt(n))
+ci_upper <- theta_hat + (1.96 * theta_sd / sqrt(n))
+
+# Afficher l'intervalle de confiance
+ci <- c(ci_lower, ci_upper)
+ci
