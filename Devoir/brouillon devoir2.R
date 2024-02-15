@@ -56,4 +56,31 @@ ma_chol2(matrix(c(4,12,-16,12,37,-43,-16,-43,98), nrow=3, ncol = 3, byrow = T))
 
 
 
+#################################################
+#(c)
+######################
+
+# transformation de Box-Müller
+# entrées: taille échantillonnale n
+box_muller <- function(n){
+  
+  m <- 2*ceiling(n/2) # le vrai nombre (pair) de réalisations uniformes nécessaire
+  u <- runif(m)
+  valeurs <- rep(0, m)
+  for(i in 1:(m/2)){
+    
+    r <- sqrt(-2*log(u[2*(i-1)+1]))
+    t <- 2*pi*u[2*(i-1)+2]
+    
+    valeurs[2*(i-1)+1] <- r*cos(t)
+    valeurs[2*(i-1)+2] <- r*sin(t)
+    
+  }
+  
+  return(valeurs[1:n])
+  
+}
+set.seed(1)
+box_muller(9)
+
 

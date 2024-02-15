@@ -61,10 +61,48 @@ ma_chol <- function(cov_mat) {
 
 On utilise notre fonction ma_chol avec la matrice $V$ créé plus juste après la question 1 (donc on n'implémentera pas l'indice qui aurait été utile si j'avais lu les questions avant de commencer l'exercices...)
 ```{r}
-ma_chol(V)
+L_chol <- ma_chol(V)
+L_chol
 ```
 
 
 ## (c)
 
+On prend le code de la fonction de Box-Muller fournit dans les notes de cours pour générer des valeurs qui suivent la loi normale $N(0,1)$
 
+```{r}
+box_muller <- function(n){
+  
+  m <- 2*ceiling(n/2) # le vrai nombre (pair) de réalisations uniformes nécessaire
+  u <- runif(m)
+  valeurs <- rep(0, m)
+  for(i in 1:(m/2)){
+    
+    r <- sqrt(-2*log(u[2*(i-1)+1]))
+    t <- 2*pi*u[2*(i-1)+2]
+    
+    valeurs[2*(i-1)+1] <- r*cos(t)
+    valeurs[2*(i-1)+2] <- r*sin(t)
+    
+  }
+  
+  return(valeurs[1:n])
+  
+}
+```
+
+
+Ensuite on utilise la fonction suivante pour généré des valeurs qui suivent une loi normale $N(0,1)$, et on en génère 5000. Une fois fait, on multiplie la matrice $Z$, et on la multiplie avec la matrice résultante de la décomposition de Cholesky
+
+```{r}
+n <- 5000
+d <- dim(L_chol)[1]
+z <- matrix(nrow = n, ncol = d)
+for(i in 1:n){
+  z[i,] <- box_muller(d)  
+}
+x <- z %*% L_chol
+```
+
+
+## (d)
