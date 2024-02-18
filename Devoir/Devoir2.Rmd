@@ -17,14 +17,14 @@ set.seed(20240220)
 On génère la matrice de covariance $\Sigma$
 ```{r}
 V = matrix(nrow = 100, ncol = 100, byrow = T)#car 100 fois 100
-V
+
 
 for(i in 1:100){
   for(j in 1:100){
     V[i,j] <- 5 * 0.8^(abs(i-j))
   }
 }
-V
+
 ```
 
 
@@ -62,7 +62,6 @@ ma_chol <- function(cov_mat) {
 On utilise notre fonction ma_chol avec la matrice $V$ créé plus juste après la question 1 (donc on n'implémentera pas l'indice qui aurait été utile si j'avais lu les questions avant de commencer l'exercices...)
 ```{r}
 L_chol <- ma_chol(V)
-L_chol
 ```
 
 
@@ -106,3 +105,31 @@ x <- z %*% L_chol
 
 
 ## (d)
+
+
+Tout d'abord on estime $\theta$ par la méthode de Monte Carlo. Nous avons déjà généré nos 100 observations indépendantes (nommé x) au (c). Nous allons donc calculer $m(X)$
+
+```{r}
+m <- function(X) {
+  return(exp(max(X)))
+}
+```
+Et ensuite on calcul la moyenne pour obtenir l'estimateur de Monte Carlo
+```{r}
+theta_chap <- mean(apply(x, 1, m))
+```
+Maintenant on estime sigma
+
+```{r}
+
+```
+
+
+
+
+
+# Question 2
+
+
+
+
