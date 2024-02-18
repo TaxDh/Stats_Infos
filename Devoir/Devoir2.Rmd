@@ -130,6 +130,8 @@ Maintenant on estime sigma
 
 # Question 2
 
+## (a)
+
 
 
 
