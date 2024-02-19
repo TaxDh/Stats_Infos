@@ -31,8 +31,6 @@ for(i in 1:100){
 ## (a)
 
 On écrit une fonction ma_chol
-
-
 ```{r}
 ma_chol <- function(cov_mat) {
   n <- nrow(cov_mat)#pour connaitre la dimension de la matrice
@@ -68,7 +66,6 @@ L_chol <- ma_chol(V)
 ## (c)
 
 On prend le code de la fonction de Box-Muller fournit dans les notes de cours pour générer des valeurs qui suivent la loi normale $N(0,1)$
-
 ```{r}
 box_muller <- function(n){
   
@@ -92,7 +89,6 @@ box_muller <- function(n){
 
 
 Ensuite on utilise la fonction suivante pour généré des valeurs qui suivent une loi normale $N(0,1)$, et on en génère 5000. Une fois fait, on multiplie la matrice $Z$, et on la multiplie avec la matrice résultante de la décomposition de Cholesky
-
 ```{r}
 n <- 5000
 d <- dim(L_chol)[1]
@@ -107,25 +103,28 @@ x <- z %*% L_chol
 ## (d)
 
 
-Tout d'abord on estime $\theta$ par la méthode de Monte Carlo. Nous avons déjà généré nos 100 observations indépendantes (nommé x) au (c). Nous allons donc calculer $m(X)$
+Tout d'abord on estime $\theta$ par la méthode de Monte Carlo. Nous avons déjà généré nos 100 observations indépendantes (nommé x) au (c). Nous allons donc calculer l'estimateur de Monte Carlo
+```{r}
+theta_hat <- mean(apply(x, 1, max))
+```
 
-```{r}
-m <- function(X) {
-  return(exp(max(X)))
-}
-```
-Et ensuite on calcul la moyenne pour obtenir l'estimateur de Monte Carlo
-```{r}
-theta_chap <- mean(apply(x, 1, m))
-```
 Maintenant on estime sigma
-
 ```{r}
-
+sigma_hat <- sd(exp(apply(x, 1, max)))
 ```
 
+Pour un alpha de 5%, on trouve z_alpha/2
+```{r}
+z_alpha_2 <- qnorm(1 - 0.05/2)
+```
 
+Et avec ceci on calcul l'intervalle de confiance pour notre $\theta$ estimé.
+```{r}
+interval <- c(
+  theta_hat - z_alpha_2 * sigma_hat / sqrt(n), theta_hat + z_alpha_2 * sigma_hat / sqrt(n))
 
+interval
+```
 
 
 # Question 2
