@@ -82,5 +82,36 @@ box_muller <- function(n){
 }
 set.seed(1)
 box_muller(9)
+#########################################
+
+# Définition des longueurs d'aiguilles à tester
+l <- c(0.2, 0.4, 0.6, 0.8, 1) # Exemple de longueurs
+estimateurs <- rep(0,5) # Initialisation du vecteur pour stocker les résultats
+
+for(k in 1:length(l)){
+  # Utilisation de la longueur d'aiguille actuelle
+  aiguille <- l[k]
+  nlattes <- 6
+  n <- 0
+  n_succ <- 0
+  
+  for(i in 1:10^5){
+    x <- nlattes*runif(2)
+    theta <- pi*runif(1)
+    
+    # Calcul des deux extrémités de l'aiguille avec la longueur actuelle
+    tete <- x - c(cos(theta), sin(theta)) * aiguille / 2
+    pointe <- x + c(cos(theta), sin(theta)) * aiguille / 2
+    
+    n <- n+1
+    
+    # Vérification si l'aiguille traverse une ligne
+    if( floor(tete[2]) != floor(pointe[2]) ){
+      n_succ <- n_succ + 1
+    }
+  }
+  # Stockage de l'estimateur pour la longueur d'aiguille actuelle
+  estimateurs[k] <- n_succ / n
+}
 
 

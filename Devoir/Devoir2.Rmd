@@ -131,6 +131,99 @@ interval
 
 ## (a)
 
+Initialisation de l'aiguille, lattes, etc.
+```{r}
+aiguille <- 0.2
+nlattes <- 6
+n <- 0
+n_succ <- 0
+```
+
+On lance 100000 fois l'aiguille
+```{r}
+for(i in 1:10^5){
+  
+  x <- nlattes*runif(2)
+  theta <- pi*runif(1)
+  
+  # calcul des deux extrémités de l'aiguille avec la nouvelle longueur 
+  tete <- x - c(cos(theta), sin(theta)) * aiguille / 2
+  pointe <- x + c(cos(theta), sin(theta)) * aiguille / 2
+
+  n <- n+1
+  
+  # vérification si l'aiguille traverse une ligne
+  if( floor(tete[2]) != floor(pointe[2]) ){
+    n_succ <- n_succ + 1
+  }
+  
+}
+```
 
 
+Calcul de la proportion d'aiguille qui traversent une séparation entre deux lattes
 
+```{r}
+proportion <- n_succ / n
+proportion
+```
+## (b)
+
+On créé 2 vecteurs, un $l$ qui représentent les longueurs d'aiguilles et un estimateurs qui représentent les proportions qui traversent une séparation entre 2 lattes
+```{r}
+l = c(0.2,0.4,0.6,0.8,1)
+estimateurs <- numeric(length(l))
+```
+
+On utilise le code plus haut et on le met dans une boucle qui va créé estimateurs avec les valeurs.
+```{r}
+for(k in 1:length(l)){
+  # Utilisation de la longueur d'aiguille actuelle
+  aiguille <- l[k]
+  nlattes <- 6
+  n <- 0
+  n_succ <- 0
+  
+  for(i in 1:10^5){
+    x <- nlattes*runif(2)
+    theta <- pi*runif(1)
+    
+    # Calcul des deux extrémités de l'aiguille avec la longueur actuelle
+    tete <- x - c(cos(theta), sin(theta)) * aiguille / 2
+    pointe <- x + c(cos(theta), sin(theta)) * aiguille / 2
+    
+    n <- n+1
+    
+    # Vérification si l'aiguille traverse une ligne
+    if( floor(tete[2]) != floor(pointe[2]) ){
+      n_succ <- n_succ + 1
+    }
+  }
+  # Stockage de l'estimateur pour la longueur d'aiguille actuelle
+  estimateurs[k] <- n_succ / n
+}
+```
+
+
+## (c)
+
+On fait le graphique de la proportion des aiguilles qui traversent la séparation entre les 2 lattes avec la longueurs des aiguilles.
+```{r}
+plot(l, estimateurs, xlim = c(0,1), ylim = c(0,1))
+```
+
+## (d)
+
+Premièrement, trouvons la valeurs de 2/pi
+```{r}
+2/pi
+```
+Ensuite on divise estimateurs par l, pour savoir s'il y a une relation entre les 2:
+```{r}
+estimateurs/l
+```
+On voit que chaque valeur est très proche de 2/pi. Alors tentons une formule 2 fois la longueur de l'aiguille sur pi. Et on la soustrait à estimateurs.
+```{r}
+2/pi *l - estimateurs
+```
+Les résultats sont très proche de 0. Ce qui semble indiquer que nous avons la bonne formule pour le ratio en fonction de la longueurs de l'aiguille.
