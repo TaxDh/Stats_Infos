@@ -20,7 +20,7 @@ lpost <- function(theta, sig2, nu, tau2){
   
   logf1 <- (N+8)/2 * log(sig2) - k/2 * log(tau2) - 1/sig2 - nu^2/2 - tau2
   logf2 <- - 1/(2*tau2) * sum((theta - nu)^2, na.rm = T)
-  logf3 <- - 1/(2 * sig2) * (Xij2 - sum(2*ni*XiMoyen*theta, na.rm = T) + sum(ni*theta^2, na.rm = T))
+  logf3 <- - 1/(2 * sig2) * (Xij2 - 2*sum(ni*XiMoyen*theta, na.rm = T) + sum(ni*theta^2, na.rm = T))
   
   return(logf1+logf2+logf3)
 }
@@ -32,4 +32,6 @@ lpost <- function(theta, sig2, nu, tau2){
 
 
 #b)
+
+
 
