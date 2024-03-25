@@ -2,6 +2,7 @@
 
 #c) theta_n+1 chapeau= signaux_theta log f(...) où (...) est la matrice hessienne
 #d) exp(a)/exp(b) = exp(a-b)
+set.seed(2024)
 X <- readRDS("Devoir3_data.RDS")
 View(X)
 
@@ -10,11 +11,11 @@ dim(X)
 
 #a)
 
+k <- 10 #nombre de lignes
+ni <- 110 #nombre de colonnes
+
 lpost <- function(theta, sig2, nu, tau2){
-  #k <- length(theta)
-  k <- 10 #nombre de lignes
-  ni <- 110 #nombre de colonnes
-  N <- sum(ni, na.rm = TRUE)
+  N <- k*ni
   XiMoyen <- rowMeans(X, na.rm = T)
   Xij2 <- sum(X^2, na.rm = T)
   
@@ -32,6 +33,31 @@ lpost <- function(theta, sig2, nu, tau2){
 
 
 #b)
+
+lpost_optim <- function(param){
+  theta <- param[1:k]
+  sig2 <- param[k+1]
+  nu <- param[k+2]
+  tau2 <- param[k+3]
+  return(-lpost(theta, sig2, nu, tau2))
+}
+
+init_param <- c(rep(0, k), 1, 0, 1)
+
+optim_results <- optim(init_param, lpost_optim, method = "L-BFGS-B")
+
+print(optim_results$par)
+
+
+print(optim_results$value) 
+
+
+
+
+
+
+
+
 
 
 
