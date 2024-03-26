@@ -36,9 +36,12 @@ lpost_optim <- function(param){
 }
 
 
-init_param <- c(rep(0, k), 10, 0, 10)
+init_param <- c(rep(0, k), 1, 0, 1)
 
-optim_results <- optim(init_param, lpost_optim, method = "L-BFGS-B")
+optim_results <- optim(init_param, lpost_optim, method = "BFGS", control = list(fnscale = -1), hessian = TRUE)
+
+#Bloque ici
+
 
 print(optim_results$par)
 
