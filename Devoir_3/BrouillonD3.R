@@ -5,7 +5,7 @@
 set.seed(2024)
 X <- readRDS("Devoir3_data.RDS")
 View(X)
-
+#write.csv(X, "D:/Documents/Trimestre Actuel/STT3010 - Statistique Informatique/Stats_Infos/Devoir_3/X.csv")
 dim(X)
 # Sortie: 10 110
 
@@ -18,6 +18,10 @@ lpost <- function(theta, sig2, nu, tau2){
   N <- k*ni
   XiMoyen <- rowMeans(X, na.rm = T)
   Xij2 <- sum(X^2, na.rm = T)
+  
+  #print(paste("log(sig2):", log(sig2))) # Check the log value of sig2
+  print(paste("log(tau2):", log(tau2)))
+  #print(paste("sum_Xij2:", Xij2))
   
   logf1 <- (N+8)/2 * log(sig2) - k/2 * log(tau2) - 1/sig2 - nu^2/2 - tau2
   logf2 <- - 1/(2*tau2) * sum((theta - nu)^2, na.rm = T)
@@ -41,6 +45,15 @@ lpost_optim <- function(param){
   tau2 <- param[k+3]
   return(-lpost(theta, sig2, nu, tau2))
 }
+
+
+
+
+lower_bounds <- c(rep(-Inf, k), log(.Machine$double.eps), -Inf, log(.Machine$double.eps))
+upper_bounds <- c(rep(Inf, k), Inf, Inf, Inf)
+
+optim_results <- optim(init_param, lpost_optim, method = "L-BFGS-B", lower = lower_bounds, upper = upper_bounds)
+
 
 init_param <- c(rep(0, k), 1, 0, 1)
 
