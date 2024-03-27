@@ -1,0 +1,2 @@
+#c) theta_n+1 chapeau= signaux_theta log f(...) où (...) est la matrice hessienne
+#d) exp(a)/exp(b) = exp(a-b)
