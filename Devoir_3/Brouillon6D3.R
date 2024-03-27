@@ -45,9 +45,29 @@ hess <- opt$hessian
 
 #on trouve la matrice de covariance
 
-cov <- solve(-hess)
+cov <- solve(hess)#H^{-1}
+
+theta_MAP <- opt$par
 
 #on trouve les écarts-types
 std <- sqrt(diag(cov))
 
+#on estime chaque theta_i avec l'approximation de laplace (proposition page 10)
+#ensuite on prend la moyenne
+#on construit l'interval de crédibilité comme un interval de confiance autour de ce theta (centré)
 
+det_MoinsH <- det(-cov)
+
+exponentielle <- -t(theta- theta_MAP)%.%(-cov)%.%(theta-theta_MAP)
+
+theta_i <- 1/((2*Pi)^(d/2)*det_MoinsH) * exponentielle
+
+#on fait maintenant la moyenne des theta_i
+
+#....................#
+
+#on fait maintenant l'interval de crédibilité
+
+#......................#
+
+#d)
