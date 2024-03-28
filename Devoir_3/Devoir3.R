@@ -75,17 +75,5 @@ for (i in 1:k) {
 }
 
 
-moyenne_densite <- mean(theta_i)
-
-
-
-
-#on fait maintenant la moyenne des theta_i
-
-#....................#
-
-#on fait maintenant l'interval de crédibilité
-
-#......................#
-
-#d)
+#à partir d'ici ça bogue, les print montre que ça donne infini pour chaque theta
+#j'abandonne ici, je n'arrive pas à débogué.
