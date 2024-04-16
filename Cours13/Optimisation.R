@@ -1,0 +1,194 @@
+#### recuit simulé ####
+
+# fonction à minimiser
+f <- function(x) ((x-.1)/2)^4 - (2*x)^2
+plot(f, -10, 10, main="f")# bimodal et avec 2 min
+# vrai minimum
+x.star <- 5.80621
+# log de la fonction h(x) = exp(-f(x))
+lh <- function(x) -f(x)#lh veut dire log(h)
+
+# nombre de points à simuler
+n <- 1e5
+# écart-type instrumental
+l <- 10 # écart-type des pas qu'on veut proposer
+
+# définition des températures
+Tmax <- 100
+Tmin <- .0001
+temp <- exp(seq(log(Tmax), log(Tmin), length.out=n))
+
+plot(log(temp))#pour vérifier si c'est bien linéaire
+
+# visualisation de la densité aux températures max et min
+plot(function(x) exp(lh(x)), -10, 10, main="h à température 1")
+plot(function(x) exp(lh(x)/Tmax), -10, 10, main="h à température maximale")
+plot(function(x) exp(lh(x)/Tmin), -10, 10, main="h à température minimale")
+
+# exp(lh(x.star)/Tmin)# sortie inf
+
+
+# initialisation de l'échantillon, et choix du point de départ
+ech <- rep(0, n+1)
+ech[1] <- -10 # essaie avec mauvais mode
+
+# algorithme
+for(t in 1:n){
+  
+  # état précédent de la chaîne
+  x.old <- ech[t]
+  
+  # génération du candidat mu.new et d'une variable U(0, 1)
+  x.new <- rnorm(1, mean=x.old, sd=l)
+  u <- runif(1)
+  
+  # test pour déterminer si le saut vers mu.new est accepté
+  accept <- (log(u) <= (lh(x.new) - lh(x.old))/temp[t])
+  if(accept) ech[t+1] <- x.new
+  else ech[t+1] <- x.old
+  
+}
+
+plot(ech, type="l")
+plot(abs(ech - x.star), type="l", log="y")
+
+####################################################################################
+#modification
+
+# nombre de points à simuler
+n <- 1e5
+# écart-type instrumental
+l <- 1 # écart-type des pas qu'on veut proposer
+
+# définition des températures
+Tmax <- 100
+Tmin <- .0001
+temp <- exp(seq(log(Tmax), log(Tmin), length.out=n))
+
+plot(log(temp))#pour vérifier si c'est bien linéaire
+
+# visualisation de la densité aux températures max et min
+plot(function(x) exp(lh(x)), -10, 10, main="h à température 1")
+plot(function(x) exp(lh(x)/Tmax), -10, 10, main="h à température maximale")
+plot(function(x) exp(lh(x)/Tmin), -10, 10, main="h à température minimale")
+
+# exp(lh(x.star)/Tmin)# sortie inf
+
+
+# initialisation de l'échantillon, et choix du point de départ
+ech <- rep(0, n+1)
+ech[1] <- -10 # essaie avec mauvais mode
+
+# algorithme
+for(t in 1:n){
+  
+  # état précédent de la chaîne
+  x.old <- ech[t]
+  
+  # génération du candidat mu.new et d'une variable U(0, 1)
+  x.new <- rnorm(1, mean=x.old, sd=l)
+  u <- runif(1)
+  
+  # test pour déterminer si le saut vers mu.new est accepté
+  accept <- (log(u) <= (lh(x.new) - lh(x.old))/temp[t])
+  if(accept) ech[t+1] <- x.new
+  else ech[t+1] <- x.old
+  
+}
+
+plot(ech, type="l")
+#On reste rarement à 0 et à force qu'on avance on traverse de moins en moins souvent 0.
+plot(abs(ech - x.star), type="l", log="y")
+
+
+
+####################################################################################
+
+# nombre de points à simuler
+n <- 1e6
+# écart-type instrumental
+l <- 10 # écart-type des pas qu'on veut proposer
+
+# définition des températures
+Tmax <- 100
+Tmin <- .01
+temp <- exp(seq(log(Tmax), log(Tmin), length.out=n))
+
+plot(log(temp))#pour vérifier si c'est bien linéaire
+
+# visualisation de la densité aux températures max et min
+plot(function(x) exp(lh(x)), -10, 10, main="h à température 1")
+plot(function(x) exp(lh(x)/Tmax), -10, 10, main="h à température maximale")
+plot(function(x) exp(lh(x)/Tmin), -10, 10, main="h à température minimale")
+
+# exp(lh(x.star)/Tmin)# sortie inf
+
+
+# initialisation de l'échantillon, et choix du point de départ
+ech <- rep(0, n+1)
+ech[1] <- -10 # essaie avec mauvais mode
+
+# algorithme
+for(t in 1:n){
+  
+  # état précédent de la chaîne
+  x.old <- ech[t]
+  
+  # génération du candidat mu.new et d'une variable U(0, 1)
+  x.new <- rnorm(1, mean=x.old, sd=l)
+  u <- runif(1)
+  
+  # test pour déterminer si le saut vers mu.new est accepté
+  accept <- (log(u) <= (lh(x.new) - lh(x.old))/temp[t])
+  if(accept) ech[t+1] <- x.new
+  else ech[t+1] <- x.old
+  
+}
+
+plot(ech, type="l")
+plot(abs(ech - x.star), type="l", log="y")
+
+##################################################################################
+# nombre de points à simuler
+n <- 1e5
+# écart-type instrumental
+l <- 1 # écart-type des pas qu'on veut proposer
+
+# définition des températures
+Tmax <- 100
+Tmin <- .01
+temp <- exp(seq(log(Tmax), log(Tmin), length.out=n))
+
+plot(log(temp))#pour vérifier si c'est bien linéaire
+
+# visualisation de la densité aux températures max et min
+plot(function(x) exp(lh(x)), -10, 10, main="h à température 1")
+plot(function(x) exp(lh(x)/Tmax), -10, 10, main="h à température maximale")
+plot(function(x) exp(lh(x)/Tmin), -10, 10, main="h à température minimale")
+
+# exp(lh(x.star)/Tmin)# sortie inf
+
+
+# initialisation de l'échantillon, et choix du point de départ
+ech <- rep(0, n+1)
+ech[1] <- -10 # essaie avec mauvais mode
+
+# algorithme
+for(t in 1:n){
+  
+  # état précédent de la chaîne
+  x.old <- ech[t]
+  
+  # génération du candidat mu.new et d'une variable U(0, 1)
+  x.new <- rnorm(1, mean=x.old, sd=l)
+  u <- runif(1)
+  
+  # test pour déterminer si le saut vers mu.new est accepté
+  accept <- (log(u) <= (lh(x.new) - lh(x.old))/temp[t])
+  if(accept) ech[t+1] <- x.new
+  else ech[t+1] <- x.old
+  
+}
+
+plot(ech, type="l")#plot le mauvais mode
+plot(abs(ech - x.star), type="l", log="y")
