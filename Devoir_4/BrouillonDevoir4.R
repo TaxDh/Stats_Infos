@@ -1,97 +1,124 @@
-#Brouillon Devoir 4 #2
+set.seed(2024)
+X <- readRDS("Devoir3_data.RDS")
 
-# Fonction pour calculer la somme des carrés, ignorera les NA
-SumSquares <- function(x) {
-  sum(x^2, na.rm=TRUE)
-}
 
-# Fonction log-densité a posteriori
-lf <- function(theta, sig2, nu, tau2, X, n, N, k) {
-  # Utiliser X, n, N, k comme défini précédemment
-  Xbar <- rowMeans(X, na.rm=TRUE)
-  tau2_inv <- 1 / (2 * tau2)
-  sig2_inv <- 1 / (2 * sig2)
-  
-  # Calculer la log-densité a posteriori
-  sum_squares <- SumSquares(X)
-  part1 <- - (N + 8)/2 * log(sig2) - k/2 * log(tau2)
-  part2 <- -1/sig2 - nu^2/2 - tau2_inv * sum((theta - nu)^2)
-  part3 <- -sig2_inv * sum_squares
-  part4 <- sig2_inv * sum(n * Xbar * theta)
-  part5 <- -sig2_inv * sum(n * theta^2)
-  return(part1 + part2 + part3 + part4 + part5)
-}
+k <- nrow(X)
+n <- rowSums(!is.na(X))
+N <- sum(n)
+Xbar <- rowMeans(X, na.rm = T)
 
-# Initialisation des paramètres
-theta <- rep(0, k) # Exemple d'initialisation
-sig2 <- 1          # Exemple d'initialisation
-nu <- 0            # Exemple d'initialisation
-tau2 <- 1          # Exemple d'initialisation
+# Question 1
+#Algorithme de Gibbs
 
-# Paramètres de l'algorithme Metropolis-Hastings
-m <- 10^6                      # Longueur de la chaîne désirée
-I <- diag(13)                  # Matrice identité pour les 13 paramètres (theta, sig2, nu, tau2)
-epsilon <- 0.1                 # Variance de la proposition (commencer avec 0.1)
-acceptance_rate <- 0           # Taux d'acceptation des sauts
-accepted <- 0                  # Compteur de sauts acceptés
+# Étape 1
+# On initialise les hyperparamètres
+nu <- 0
+tau2 <- 1
+alpha <- 3
+beta <- 1
 
-# Boucle Metropolis-Hastings
-for (i in 1:m) {
-  # Proposition de nouveaux paramètres basés sur une distribution normale multivariée
-  new_theta <- rnorm(k, mean=theta, sd=sqrt(epsilon))
-  new_sig2 <- rnorm(1, mean=sig2, sd=sqrt(epsilon))
-  new_nu <- rnorm(1, mean=nu, sd=sqrt(epsilon))
-  new_tau2 <- rnorm(1, mean=tau2, sd=sqrt(epsilon))
+theta <- Xbar  # On initialise theta pour la moyenne de chaque strate
+sigma2 <- var(X, na.rm = TRUE)  # Initialise sigma2 et la variance de X
+
+
+# Étape 2
+m <- 1e6 # Nombre d'itération
+#m <- 1000 # Pour les tests
+
+
+# Étape 3
+for(t in 1:m){
   
-  # Calcul de la log-densité a posteriori pour les nouveaux paramètres
-  new_lf <- lf(new_theta, new_sig2, new_nu, new_tau2, X, n, N, k)
-  
-  # Calcul de la log-densité a posteriori pour les anciens paramètres
-  old_lf <- lf(theta, sig2, nu, tau2, X, n, N, k)
-  
-  # Calcul du ratio de Hastings
-  r <- exp(new_lf - old_lf)
-  
-  # Accepter ou rejeter les nouveaux paramètres basés sur le ratio de Hastings
-  if (runif(1) < r) {
-    theta <- new_theta
-    sig2 <- new_sig2
-    nu <- new_nu
-    tau2 <- new_tau2
-    accepted <- accepted + 1
+  # On initialise et met à jour tau2 (l'indice)
+  accept <- FALSE
+  while(!accept) {
+    y <- 1/rgamma(1, shape=k/2 - 1, rate=sum((theta - nu)^2)/2)
+    u <- runif(1)
+    accept <- (log(u) <= -y)
   }
+  tau2 <- y
   
-  # Mettre à jour le taux d'acceptation
-  acceptance_rate <- accepted / i
+  # On met à jour nu
+  nu_mean <- sum(theta) / k
+  nu_var <- tau2 / k
+  nu <- rnorm(1, mean=nu_mean, sd=sqrt(nu_var))
+  
+  
+  # On met à jour sig2
+  alpha_post <- (N + 6) / 2
+  beta_post <- beta + 0.5 * sum(sapply(1:k, function(i) sum((X[i, ] - theta[i])^2, na.rm = TRUE)))
+  sigma2 <- 1 / rgamma(1, shape=alpha_post, rate=beta_post)
+  
+  
+  # Pour chaque i, on calcul theta[i]
+  for(i in 1:k){
+    ni_i <- n[i]  # Nombre d'observations dans la ième strate
+    Xbar_i <- Xbar[i]  # Moyenne des observations dans la ième strate
+    tau2_inv <- 1 / tau2
+    sigma2_inv <- 1 / sigma2
+    theta_mean <- (nu * tau2_inv + ni_i * Xbar_i * sigma2_inv) / (tau2_inv + ni_i * sigma2_inv)
+    theta_var <- 1 / (tau2_inv + ni_i * sigma2_inv)
+    theta[i] <- rnorm(1, mean=theta_mean, sd=sqrt(theta_var))
+  }
+  print(t)#Pour s'assurer que la boucle n'est pas infinie
 }
 
-# Résultats
-cat("Taux d'acceptation final:", acceptance_rate, "\n")
+# Notre résultat
+theta
 
 
+# Question 2
 
+# Étape 1
 
-
-
-
-
-#############################
-
-
-# Fonction pour calculer la log-densité a posteriori donnée dans l'énoncé de la question
-lf <- function(theta, sig2, nu, tau2) {
-  SumSquares <- sum(X^2, na.rm=TRUE)  # Somme des carrés des observations
-  n <- rowSums(!is.na(X))  # Nombre d'observations par strate
-  N <- sum(n)  # Nombre total d'observations
-  k <- nrow(X)  # Nombre de strates
-  Xbar <- rowMeans(X, na.rm=TRUE)  # Moyennes par strate
-  
-  # Calcul de la log-densité a posteriori
-  - (N + 8)/2 * log(sig2) - k/2 * log(tau2) - 1/sig2 - nu^2/2 - 
+# On recopie le code fournit pour la log de f à postériori
+SumSquares <- sum(X^2, na.rm=TRUE)
+lf <- function(theta, sig2, nu, tau2){
+  - (N + 8)/2 * log(sig2) - k/2 * log(tau2) - 1/sig2 - nu^2/2 -
     tau2 - sum((theta - nu)^2)/(2*tau2) - SumSquares/(2*sig2) +
     sum(n*Xbar*theta)/sig2 - sum(n*theta^2)/(2*sig2)
 }
 
-# Le reste du code pour l'algorithme de Metropolis-Hastings reste principalement le même.
-# Assurez-vous simplement de définir correctement X, n, N, k, et Xbar avant d'appeler lf dans la boucle.
-# ...
+
+# Initialisation des paramètres
+theta <- rep(0, k)
+sig2 <- 1
+nu <- 0
+tau2 <- 1
+
+m <- 1e3 # Longueur de la chaine
+
+# initialisation de l'échantillon et point de départ
+ech <- matrix(0, nrow=m+1, ncol=k+3)
+ech[1,] <- c(theta, sig2, nu, tau2, NA)
+
+# Variance instrumentale pour la proposition
+l2 <- 0.1
+l <- sqrt(l2)
+
+# Algorithme de Metropolis-Hastings
+for(t in 2:m) {
+  # Étape 4: Générer indépendamment les propositions pour les paramètres
+  proposed_theta <- rnorm(k, mean=theta, sd=l)
+  proposed_sig2 <- exp(rnorm(1, mean=log(sig2), sd=l))  # Log-normal pour assurer positivité
+  proposed_nu <- rnorm(1, mean=nu, sd=l)
+  proposed_tau2 <- exp(rnorm(1, mean=log(tau2), sd=l))  # Log-normal pour assurer positivité
+  
+  # Calculer le rapport de Metropolis-Hastings
+  current_lf <- lf(theta, sig2, nu, tau2)
+  proposed_lf <- lf(proposed_theta, proposed_sig2, proposed_nu, proposed_tau2)
+  r <- exp(proposed_lf - current_lf)
+  
+  # Étape 5: Décider d'accepter ou de rejeter les propositions
+  u <- runif(1)
+  if(u < r) {
+    ech[t,] <- c(proposed_theta, proposed_sig2, proposed_nu, proposed_tau2)
+    # Mettre à jour les paramètres si la proposition est acceptée
+    theta <- proposed_theta
+    sig2 <- proposed_sig2
+    nu <- proposed_nu
+    tau2 <- proposed_tau2
+  } else {
+    ech[t,] <- ech[t-1,]
+  }
+}

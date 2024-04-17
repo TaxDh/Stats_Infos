@@ -52,8 +52,8 @@ for(t in 1:m){
   
   # Pour chaque i, on calcul theta[i]
   for(i in 1:k){
-    ni_i <- n[i]  # Nombre d'observations dans la i-ème strate
-    Xbar_i <- Xbar[i]  # Moyenne des observations dans la i-ème strate
+    ni_i <- n[i]  # Nombre d'observations dans la ième strate
+    Xbar_i <- Xbar[i]  # Moyenne des observations dans la ième strate
     tau2_inv <- 1 / tau2
     sigma2_inv <- 1 / sigma2
     theta_mean <- (nu * tau2_inv + ni_i * Xbar_i * sigma2_inv) / (tau2_inv + ni_i * sigma2_inv)
@@ -69,9 +69,31 @@ theta
 
 # Question 2
 
+# Étape 1
+
+# On recopie le code fournit pour la log de f à postériori
 SumSquares <- sum(X^2, na.rm=TRUE)
 lf <- function(theta, sig2, nu, tau2){
   - (N + 8)/2 * log(sig2) - k/2 * log(tau2) - 1/sig2 - nu^2/2 -
     tau2 - sum((theta - nu)^2)/(2*tau2) - SumSquares/(2*sig2) +
     sum(n*Xbar*theta)/sig2 - sum(n*theta^2)/(2*sig2)
 }
+
+
+# Initialisation des paramètres
+theta <- rep(0, k)
+sig2 <- 1
+nu <- 0
+tau2 <- 1
+
+m <- 1e3 # Longueur de la chaine
+
+# initialisation de l'échantillon et point de départ
+ech <- matrix(0, nrow=m+1, ncol=k+3)
+ech[1,] <- c(theta, sig2, nu, tau2, NA)
+
+# Variance instrumentale pour la proposition
+l2 <- 0.1
+l <- sqrt(l2)
+
+#Je n'ai pas terminé le numéro
