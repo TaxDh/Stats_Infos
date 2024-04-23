@@ -1,0 +1,302 @@
+############################
+# Calcul bayésien approximatif (ABC)
+###########################
+
+Le document intitulé "Calcul bayésien approximatif (ABC)" présente des méthodes pour la simulation en inférence bayésienne, en particulier quand il est difficile de simuler directement à partir de la loi a posteriori. Voici un résumé des concepts clés et des algorithmes abordés :
+
+### Calcul Bayésien Approximatif (ABC)
+Le but du calcul bayésien approximatif est de générer des observations à partir d'une distribution qui est suffisamment proche de la loi a posteriori. Ce processus est souvent nécessaire car simuler directement la loi a posteriori peut être complexe ou irréalisable pour certains modèles.
+
+### Méthodes et Algorithme
+1. **Modèles discrets** :
+   - **Exemple Poisson-Gamma** : Le document explique comment simuler à partir de la loi conjointe d'un paramètre λ et d'une variable aléatoire X suivant une distribution Poisson conditionnée par λ.
+   - **Simulation exacte a posteriori** : Un algorithme est décrit pour générer des observations directement à partir de la loi a posteriori en utilisant la méthode de rejet, applicable aux modèles discrets.
+
+2. **Modèles continus** :
+   - Pour les modèles où la variable aléatoire X est continue, le document explique que simuler exactement à partir de la loi conditionnelle de θ | X1:n = x1:n est improbable.
+   - **ABC basé sur les rejets** : Une méthode où l’on génère des observations θ et on les accepte si l’échantillon généré X1:n est suffisamment proche de l’échantillon observé x1:n, basé sur une mesure de distance ρ et un seuil d'acceptation ε.
+
+### Choix de la Fonction de Distance ρ
+- **Distances vectorielles et matricielles standard** : Utilisation de normes comme la norme Euclidienne ou la norme infinie pour comparer les observations simulées aux observations réelles.
+- **Comparaison basée sur des statistiques exhaustives** : Une approche alternative qui utilise des statistiques résumant l'information de l'échantillon pour comparer les échantillons simulés aux échantillons observés.
+
+### Applications et Implications
+- Les techniques ABC sont particulièrement utiles dans les cas où la loi a posteriori est complexe ou impossible à simuler directement.
+- Ces méthodes sont largement utilisées en statistique bayésienne pour l'estimation de paramètres, l'inférence, et le test d'hypothèses dans des contextes où les méthodes conventionnelles ne sont pas faisables.
+
+Ce document met en évidence les défis et les solutions pratiques dans l'application de l'inférence bayésienne à des problèmes réels, en s'adaptant aux limitations de la simulation directe à partir de la loi a posteriori.
+
+
+###################
+# code r
+##################
+
+Le code R que vous avez fourni met en œuvre deux exemples de simulation bayésienne : le premier avec un modèle Poisson-Gamma et le second avec un modèle de mélange. Je vais expliquer chaque segment du code point par point et faire des liens avec le document original sur le Calcul Bayésien Approximatif (ABC).
+
+### Exemple 1 : Poisson-Gamma
+Ce modèle utilise la distribution de Poisson pour les données observées, avec un paramètre λ qui suit une distribution Gamma. L'objectif est de mettre à jour les croyances sur λ à l'aide des données observées en utilisant la méthode ABC.
+
+#### Paramétrisation du modèle
+```r
+a <- 3
+b <- 3
+data_obs <- c(3,4,6)
+```
+Les hyperparamètres `a` et `b` définissent la forme et le taux de la distribution Gamma a priori, \( \lambda \sim \text{Gamma}(3,3) \). Les données observées sont `[3,4,6]`.
+
+#### Calcul de la densité a posteriori
+```r
+post <- function(lambda) dgamma(lambda, shape=a+sum(data_obs), rate=b+length(data_obs))
+plot(post, 0, 5, xlab="lambda", ylab="f(lambda | X)")
+```
+La fonction `post` calcule la densité a posteriori pour λ, mise à jour avec les observations. Le graphique illustre cette densité.
+
+#### Fonction ABC pour échantillonner à partir de la loi a posteriori
+```r
+ABC_PoisGamm <- function(m, data_obs){ ... }
+```
+Cette fonction effectue la simulation ABC pour obtenir des échantillons de λ à partir de la loi a posteriori approximative. Elle génère des échantillons de Poisson donnés λ et accepte λ si l'échantillon simulé correspond exactement aux données observées.
+
+### Exemple 2 : Modèle de Mélange
+Le deuxième exemple concerne un modèle de mélange gaussien, où les observations peuvent venir de deux distributions normales différentes.
+
+#### Paramétrisation des priors
+```r
+prior_1 <- function(u1) dnorm(u1, mean=0, sd=10)
+prior_2 <- function(u2) dnorm(u2, mean=0, sd=10)
+prior_p <- function(p) dunif(p, min=0, max=.5)
+```
+Les fonctions `prior_1`, `prior_2`, et `prior_p` définissent les distributions a priori pour les paramètres du modèle de mélange : deux moyennes suivant des normales centrées en zéro avec une grande variance, et une proportion p entre 0 et 0.5.
+
+#### Génération des données observées
+```r
+data_obs <- c(rnorm(n/3, mean=-1, sd=1), rnorm(2*n/3, mean=1, sd=1))
+```
+Les données sont générées à partir de deux distributions normales centrées en -1 et 1.
+
+#### Calcul de la densité a posteriori conditionnelle
+Les fonctions `post` et les plots qui suivent montrent comment évaluer et visualiser la densité a posteriori pour chaque paramètre, fixant les autres à des valeurs plausibles.
+
+#### Fonction ABC pour échantillonner à partir de la loi a posteriori par modèle de mélange
+```r
+ABC_melange <- function(m, data_obs, rho, eps){ ... }
+```
+Cette fonction simule les paramètres du modèle de mélange en utilisant ABC, où `rho` est une fonction de distance pour comparer les échantillons observés et simulés, et `eps` est le seuil d'acceptation.
+
+### Conclusion
+Ces exemples illustrent comment les simulations bayésiennes et les techniques ABC peuvent être implémentées en R pour des modèles statistiques complexes. Ces méthodes permettent de contourner les calculs directs des distributions a posteriori, souvent difficiles ou impossibles à obtenir analytiquement, comme discuté dans le document sur le Calcul Bayésien Approximatif.
+
+
+############################
+# MCMC
+###########################
+
+Le document intitulé "Méthodes de Monte Carlo par chaînes de Markov (MCMC)" présente les fondements théoriques et les applications pratiques des techniques MCMC, qui sont cruciales pour l'estimation de distributions complexes en statistique, notamment les lois a posteriori en inférence bayésienne. Voici un résumé des points clés et des algorithmes décrits dans le document :
+
+### 1. Concepts de Base des Chaînes de Markov
+- **Définition** : Une chaîne de Markov est une suite de variables aléatoires où la distribution de chaque terme ne dépend que du terme immédiatement précédent.
+- **Propriété Markovienne** : \(P(X_m = j | X_0 = i_0, \dots, X_{m-1} = i) = P(X_m = j | X_{m-1} = i)\).
+- **Homogénéité** : Les chaînes utilisées sont supposées homogènes, c'est-à-dire que les probabilités de transition sont constantes dans le temps.
+
+### 2. Distribution Stationnaire et Théorèmes Ergodiques
+- **Distribution Stationnaire** : Une distribution est dite stationnaire si elle reste inchangée par l'opération de la chaîne de Markov au fil du temps.
+- **Ergodicité** : Une chaîne est ergodique si elle satisfait certaines conditions, permettant théoriquement d'atteindre toutes les parties de l'espace d'état et d'obtenir des estimations statistiques fiables à long terme.
+- **Théorèmes Ergodiques** : Ils garantissent que la moyenne temporelle converge vers la moyenne théorique de la distribution stationnaire.
+
+### 3. Échantillonnage de Gibbs
+- **Concept** : Technique MCMC pour générer des échantillons à partir de distributions conjointes complexes en échantillonnant chaque variable conditionnellement sur les autres.
+- **Algorithme** :
+  1. Initialisation à un point de départ.
+  2. Mise à jour de chaque variable séquentiellement en utilisant sa distribution conditionnelle.
+
+### 4. Échantillonnage de Metropolis-Hastings
+- **Principe** : Permet de construire une chaîne de Markov dont la distribution stationnaire est proportionnelle à une fonction densité cible.
+- **Algorithme** :
+  1. Générer un candidat selon une loi propositionnelle.
+  2. Accepter ou rejeter le candidat basé sur une règle de décision qui utilise la densité cible et la loi propositionnelle.
+
+### 5. Méthodes MCMC en Pratique
+- **Burn-in** : Période initiale pendant laquelle les échantillons peuvent être dépendants des conditions initiales et ne sont pas utilisés dans les estimations finales.
+- **Diagnostic de Convergence** : Techniques pour évaluer si la chaîne de Markov a suffisamment convergé vers sa distribution stationnaire.
+- **Gestion de l'Autocorrélation** : Méthodes pour réduire l'impact de l'autocorrélation dans les estimations pour améliorer l'efficacité statistique.
+
+### Conclusion
+Les méthodes MCMC sont essentielles pour les analyses où les distributions directes sont inaccessibles ou complexes à calculer. Elles sont largement utilisées en statistiques bayésiennes pour traiter des modèles avec de nombreux paramètres interdépendants et permettent d'approcher des problèmes autrement intractables. Le document détaille les fondations mathématiques et pratiques nécessaires pour implémenter ces techniques de manière efficace et comprendre leurs implications théoriques.
+
+
+####
+Code r
+####
+
+Le code R que vous avez fourni illustre l'implémentation de plusieurs concepts de chaînes de Markov et de méthodes MCMC, y compris les marches aléatoires (MA), le modèle autorégressif d'ordre 1 (AR(1)), l'échantillonnage de Gibbs, et l'échantillonnage de Metropolis-Hastings. Je vais expliquer chaque partie du code et faire des liens avec les concepts du document.
+
+### Exemples de chaînes de Markov continues: Marche Aléatoire (MA) et Modèle Autorégressif (AR(1))
+
+#### Marche Aléatoire (MA)
+- **MA Manuelle et Automatisée**: Le code simule une marche aléatoire où chaque nouvelle valeur dépend de la précédente, ajoutant un bruit normal.
+  ```r
+  set.seed(55555)
+  M <- 1e4
+  x <- rnorm(1)
+  for(t in 1:M){
+    x <- c(x, rnorm(1, mean=x[t], sd=1))
+    lines((t-1):t, x[t:(t+1)])
+  }
+  ```
+  Cette simulation correspond à l'exemple mentionné dans le document où \( X_m | X_{m-1} \sim N(X_{m-1}, 1) \).
+
+#### Modèle Autorégressif (AR(1))
+- **AR(1) Automatisé**: Simule un processus AR(1) où chaque nouvelle valeur dépend linéairement de la précédente plus un bruit normal.
+  ```r
+  set.seed(55555)
+  r <- 0.9
+  x <- rnorm(1)
+  for(t in 1:M){
+    x <- c(x, rnorm(1, mean=r*x[t], sd=1))
+    lines((t-1):t, x[t:(t+1)])
+  }
+  ```
+  Ce modèle suit le principe d'un modèle autorégressif d'ordre 1 où \( X_m | X_{m-1} \sim N(rX_{m-1}, 1) \), comme discuté dans le document.
+
+### Exemple(s) Gibbs
+L'échantillonnage de Gibbs est utilisé pour simuler des distributions conjointes complexes en échantillonnant alternativement de leurs distributions conditionnelles.
+- **Exemple Normal (Moyenne et Variance Inconnues)**: Utilise l'échantillonnage de Gibbs pour estimer la moyenne et la variance d'une distribution normale en fonction d'une observation.
+  ```r
+  for(t in 1:m){
+    mu <- rnorm(1, mean=moy.tmp, sd=sqrt(var.tmp))
+    sig2 <- 1 / rgamma(1, shape=alpha+1/2, rate=beta+(mu-X)^2/2)
+    ech[t+1,] <- c(mu, sig2)
+  }
+  ```
+  Ce code échantillonne la moyenne et la variance conditionnellement l'une à l'autre, illustrant la technique d'échantillonnage de Gibbs discutée dans le document.
+
+### Exemples Metropolis-Hasting
+L'échantillonnage de Metropolis-Hastings est une méthode MCMC pour obtenir des échantillons à partir de distributions complexes en générant des candidats et en les acceptant ou les rejetant en fonction d'une probabilité calculée.
+- **Exemple Normal (Moyenne Inconnue)**: Simule la distribution a posteriori d'une moyenne de distribution normale.
+  ```r
+  for(t in 1:m){
+    mu.new <- rnorm(1, mean=mu.old, sd=l)
+    accept <- (log(u) <= - (X - mu.new)^2/2 - (mu.new - nu)^2/(2*tau2) + (X - mu.old)^2/2 + (mu.old - nu)^2/(2*tau2))
+    if(accept) ech[t+1,1] <- mu.new
+    else ech[t+1,1] <- mu.old
+  }
+  ```
+  Cet algorithme génère un candidat pour la moyenne et l'accepte ou le rejette en fonction d'une probabilité calculée à partir de la densité cible et de la loi de proposition.
+
+Chaque segment de ce code illustre une application pratique des méthodes MCMC discutées dans le document, offrant un aperçu de leur mise en œuvre et de leur efficacité pour simuler des distributions complexes en statistique et en inférence bayésienne.
+
+
+###################################
+# rééchantillonnage
+##################################
+
+
+Le document intitulé "Estimation de variance et validation par rééchantillonnage" couvre principalement deux techniques statistiques : le bootstrap et la validation croisée. Voici un résumé des points clés et des algorithmes décrits :
+
+### 1. Bootstrap
+Le bootstrap est une méthode pour estimer la distribution d'un estimateur statistique. Voici les éléments clés :
+- **Principe général** : Générer plusieurs échantillons à partir d'une distribution estimée et utiliser ces échantillons pour évaluer la variance de l'estimateur.
+- **Méthodes de bootstrap** :
+  - **Bootstrap nonparamétrique** : Les échantillons sont générés par échantillonnage avec remise à partir de l'échantillon original.
+  - **Bootstrap avec lissage** : Similaire au bootstrap nonparamétrique, mais ajoute un "bruit" par un estimateur de densité (noyaux).
+  - **Bootstrap paramétrique** : Utilise un modèle paramétrique pour générer des échantillons à partir de la distribution estimée.
+- **Applications** : Estimation de la variance, réalisation de tests d'hypothèse, et création d'intervalles de confiance.
+
+### 2. Validation croisée
+La validation croisée est utilisée pour évaluer la performance prédictive des modèles statistiques et éviter le surajustement. Les méthodes abordées comprennent :
+- **Leave-one-out** : Chaque observation est retirée à tour de rôle, le modèle est entraîné sur le reste des données, puis testé sur l'observation omise.
+- **K-fold** : L'échantillon est divisé en k groupes, et chaque groupe est omis à tour de rôle pour l'entraînement et la validation.
+- **Utilisations** : Adaptée à différents types de problèmes d'apprentissage supervisé et peut être configurée avec diverses fonctions de perte pour mesurer les erreurs de prédiction.
+
+### Explications Algorithmiques
+1. **Bootstrap** :
+   - Générer B échantillons bootstrap de la taille de l'échantillon original par échantillonnage avec remise.
+   - Calculer l'estimateur pour chaque échantillon bootstrap.
+   - Estimer la variance de l'estimateur par la variance des estimateurs calculés sur les échantillons bootstrap.
+
+2. **Validation croisée** :
+   - Pour le leave-one-out : Retirer chaque observation une par une, entraîner le modèle sur le reste, tester sur l'observation omise, et calculer l'erreur.
+   - Pour le K-fold : Diviser les données en k groupes, retirer chaque groupe à tour de rôle, entraîner le modèle sur les groupes restants, tester sur le groupe retiré, et calculer l'erreur.
+
+Ces méthodes sont essentielles pour comprendre la fiabilité des estimations et la performance des modèles en évitant les biais dûs à un surajustement ou à une mauvaise estimation de la variance.
+
+############################
+# Optimisation
+###########################
+
+Le document "Optimisation stochastique" explore différentes méthodes d'optimisation utilisées pour trouver les valeurs minimales de fonctions complexes en utilisant des approches probabilistes. Voici un résumé des points clés et des méthodes présentées :
+
+### 1. **Optimisation Stochastique**
+L'optimisation stochastique incorpore des éléments aléatoires dans la recherche de l'optimum d'une fonction. Cela peut aider à éviter les pièges des minimums locaux, surtout dans les cas où la fonction objectif est complexe et présente plusieurs extrêmes.
+
+### 2. **Optimisation de Type “Random Search”**
+- **Concept**: Cette méthode introduit une composante aléatoire pour sélectionner les points dans l'espace de la fonction, ce qui permet une exploration plus libre que les méthodes déterministes comme le "grid search".
+- **Utilisation de la Distribution de Gibbs**: Les points sont générés selon une distribution de Gibbs \( g(x) \propto \exp(-f(x)/T) \), où \( T \) est une température contrôlant la dispersion des points. Cette approche permet de concentrer l'exploration autour des basses valeurs de \( f \).
+
+### 3. **Recuit Simulé (Simulated Annealing)**
+- **Principe**: Inspiré par le processus de refroidissement des métaux, cette méthode commence par explorer largement l'espace des solutions à des "températures" élevées puis réduit progressivement la température pour permettre une convergence vers le minimum global.
+- **Mise en Œuvre**: Utilise une chaîne de Markov pour générer des points, acceptant ou rejetant chaque nouveau point basé sur une fonction de densité qui favorise les valeurs basses de \( f \) ajustées par la température actuelle.
+- **Cooling Schedule**: La série de températures décroissantes (cooling schedule) est cruciale pour assurer une bonne convergence.
+
+### 4. **Descente du Gradient Stochastique**
+- **Description**: Une variation de la descente du gradient classique où, au lieu de calculer le gradient de la fonction objectif complète à chaque étape, un sous-ensemble aléatoire de composantes est utilisé pour estimer le gradient.
+- **Avantages**: Cette méthode est particulièrement utile pour les grands ensembles de données ou des modèles complexes, comme les réseaux de neurones, où le calcul du gradient complet est trop coûteux.
+- **Convergence**: Les critères de convergence sont souvent basés sur la taille du gradient estimé, permettant de déterminer si l'algorithme a atteint un point où les améliorations deviennent négligeables.
+
+### Comparaison avec la Génération de Données
+Dans les discussions précédentes sur le bootstrap et la validation croisée, l'accent était mis sur la génération de multiples échantillons pour évaluer la stabilité ou la précision des estimations statistiques. En contraste, les méthodes d'optimisation stochastique sont conçues pour naviguer efficacement dans l'espace de solutions afin de minimiser ou maximiser une fonction objectif. Bien que les deux approches utilisent des techniques aléatoires, leur objectif et leur mise en œuvre diffèrent significativement : l'optimisation cherche à améliorer un critère spécifique (par exemple, minimiser une perte), tandis que les méthodes de rééchantillonnage visent à comprendre les propriétés statistiques d'un estimateur.
+
+
+####
+code r
+####
+
+Le code R que vous avez fourni met en œuvre une technique d'optimisation connue sous le nom de **recuit simulé** (simulated annealing). Cette méthode est utilisée pour trouver le minimum global d'une fonction complexe qui peut avoir plusieurs minimums locaux, comme illustré par la fonction multimodale dans le code.
+
+### Explication du code :
+
+#### Fonction à Minimiser
+```r
+f <- function(x) ((x-.1)/2)^4 - (2*x)^2
+plot(f, -10, 10, main="f") # Visualisation de la fonction, bimodale avec deux minima.
+```
+La fonction `f` est clairement bimodale, possédant deux creux qui représentent des minima locaux.
+
+#### Initialisation et Paramètres
+```r
+n <- 1e5 # Nombre de points à simuler.
+l <- 10  # Écart-type des propositions pour les pas.
+```
+Le nombre de points `n` et l'écart-type `l` sont définis pour contrôler le processus de simulation et la largeur des pas proposés, respectivement.
+
+#### Définition des Températures
+```r
+Tmax <- 100
+Tmin <- .0001
+temp <- exp(seq(log(Tmax), log(Tmin), length.out=n))
+```
+Les températures varient de `Tmax` à `Tmin`, décroissant exponentiellement. Cette décroissance contrôle le niveau d'acceptation des nouvelles propositions : au début, la méthode accepte plus facilement les changements même s'ils augmentent la fonction de coût (pour explorer l'espace), puis devient de plus en plus conservatrice (pour affiner vers le minimum global).
+
+#### Simulation du Recuit Simulé
+```r
+ech <- rep(0, n+1)
+ech[1] <- -10 # Point de départ arbitraire.
+
+for(t in 1:n){
+  x.old <- ech[t]
+  x.new <- rnorm(1, mean=x.old, sd=l)
+  u <- runif(1)
+  accept <- (log(u) <= (lh(x.new) - lh(x.old))/temp[t])
+  if(accept) ech[t+1] <- x.new
+  else ech[t+1] <- x.old
+}
+```
+Dans la boucle, un nouveau point `x.new` est proposé basé sur le point précédent `x.old`. Le critère d'acceptation dépend de la fonction `lh` (logarithme de la fonction `h`), de la différence de coût entre les points nouveaux et anciens, et de la température actuelle. Si la proposition est acceptée, elle est enregistrée; sinon, le point précédent est répété.
+
+### Différence entre Générer et Optimiser
+
+Dans le contexte des documents précédents, les techniques de **génération** telles que le bootstrap et la validation croisée concernent la création de multiples échantillons à partir d'un ensemble de données existant ou l'évaluation de la robustesse d'un modèle statistique par des tests répétés sur différentes sous-parties des données.
+
+Le **recuit simulé**, par contre, est une méthode d'**optimisation**. L'objectif ici n'est pas de générer des données ou d'évaluer la stabilité d'un estimateur, mais de trouver le point (par exemple, un ensemble de paramètres) qui minimise (ou maximise) une fonction donnée. Cette méthode est particulièrement utile pour les problèmes d'optimisation complexes avec de nombreux minima locaux, où des techniques plus simples pourraient rester coincées dans un minimum local au lieu de trouver le minimum global.
+
+En somme, les méthodes de génération explorent ou évaluent les données, tandis que les techniques d'optimisation comme le recuit simulé cherchent à améliorer ou à optimiser une métrique spécifique en explorant systématiquement l'espace des solutions.
